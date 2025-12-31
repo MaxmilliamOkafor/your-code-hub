@@ -13,21 +13,53 @@
         <img src="icons/icon48.png" alt="ATS Tailor" class="logo-icon">
         <div class="logo-text">
           <h1>Bulk Apply Dashboard</h1>
-          <span class="tagline">Sequential Job Application Engine</span>
+          <span class="tagline">Workday + Multi-ATS Sequential Engine</span>
         </div>
       </div>
-      <a href="popup.html" class="back-link">← Back to Main</a>
+      <div class="header-actions">
+        <span class="version-badge">v2.0</span>
+        <a href="popup.html" class="back-link">← Back to Main</a>
+      </div>
     </header>
+
+    <!-- Workday Credentials Section -->
+    <section class="credentials-section" id="credentialsSection">
+      <div class="credentials-header">
+        <h3>🔐 Workday Account Credentials</h3>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoLoginToggle" checked>
+          <span class="slider"></span>
+          <span class="toggle-label">Auto-login Workday</span>
+        </label>
+      </div>
+      <div class="credentials-form" id="credentialsForm">
+        <div class="form-group">
+          <label for="workdayEmail">Email</label>
+          <input type="email" id="workdayEmail" value="Maxokafordev@gmail.com" placeholder="your-email@example.com">
+        </div>
+        <div class="form-group">
+          <label for="workdayPassword">Password</label>
+          <div class="password-field">
+            <input type="password" id="workdayPassword" value="May19315park@" placeholder="Your Workday password">
+            <button type="button" class="toggle-visibility" id="togglePasswordBtn">👁️</button>
+          </div>
+        </div>
+        <button id="saveCredsBtn" class="btn btn-sm btn-secondary">💾 Save Credentials</button>
+      </div>
+    </section>
 
     <!-- Upload Section -->
     <section class="upload-section">
       <div class="upload-zone" id="uploadZone">
         <div class="upload-icon">📁</div>
         <p class="upload-text">Drag & drop CSV file or click to browse</p>
-        <p class="upload-hint">Format: job_url, candidate_name, email, phone, priority, notes</p>
+        <p class="upload-hint">Format: job_url, candidate_name, email, phone, experience_json, priority</p>
         <input type="file" id="csvInput" accept=".csv" hidden>
       </div>
-      <button id="loadSampleBtn" class="btn btn-secondary btn-sm">Load Sample Data</button>
+      <div class="upload-actions">
+        <button id="loadSampleBtn" class="btn btn-secondary btn-sm">📋 Load Sample Data</button>
+        <button id="downloadTemplateBtn" class="btn btn-secondary btn-sm">📥 Download CSV Template</button>
+      </div>
     </section>
 
     <!-- Jobs Table -->
@@ -37,10 +69,13 @@
           <span id="jobCount">0 jobs loaded</span>
           <span class="table-separator">|</span>
           <span id="selectedCount">0 selected</span>
+          <span class="table-separator">|</span>
+          <span id="platformCount">0 Workday</span>
         </div>
         <div class="table-actions">
-          <button id="selectAllBtn" class="btn btn-sm">Select All</button>
-          <button id="deselectAllBtn" class="btn btn-sm btn-secondary">Deselect All</button>
+          <button id="selectAllBtn" class="btn btn-sm">✅ Select All</button>
+          <button id="deselectAllBtn" class="btn btn-sm btn-secondary">❌ Deselect All</button>
+          <button id="selectWorkdayBtn" class="btn btn-sm btn-workday">🏢 Select Workday Only</button>
         </div>
       </div>
       
@@ -50,6 +85,7 @@
             <tr>
               <th class="col-select">✓</th>
               <th class="col-status">Status</th>
+              <th class="col-platform">Platform</th>
               <th class="col-url">Job URL</th>
               <th class="col-candidate">Candidate</th>
               <th class="col-priority">Priority</th>
@@ -64,18 +100,19 @@
     <section class="control-panel hidden" id="controlPanel">
       <div class="control-row">
         <div class="speed-control">
-          <label for="speedSelect">Speed:</label>
+          <label for="speedSelect">⚡ Speed:</label>
           <select id="speedSelect">
-            <option value="60000">1 job/min</option>
+            <option value="60000">1 job/min (Safe)</option>
             <option value="30000">2 jobs/min</option>
-            <option value="12000">5 jobs/min</option>
-            <option value="6000" selected>10 jobs/min</option>
+            <option value="20000">3 jobs/min</option>
+            <option value="12000" selected>5 jobs/min (Workday OK)</option>
+            <option value="6000">10 jobs/min (Fast)</option>
           </select>
         </div>
         
         <div class="control-buttons">
           <button id="startBtn" class="btn btn-primary btn-lg">
-            <span>▶️</span> START
+            <span>▶️</span> START BULK APPLY
           </button>
           <button id="pauseBtn" class="btn btn-warning btn-lg" disabled>
             <span>⏸️</span> PAUSE
@@ -85,6 +122,9 @@
           </button>
           <button id="stopBtn" class="btn btn-danger btn-lg" disabled>
             <span>⏹️</span> STOP
+          </button>
+          <button id="quitBtn" class="btn btn-quit btn-lg" disabled>
+            <span>❌</span> QUIT
           </button>
         </div>
       </div>
@@ -99,11 +139,15 @@
             <span class="stat-value" id="progressCount">0/0</span>
             <span class="stat-label">Progress</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-percent">
+            <span class="stat-value" id="progressPercent">0%</span>
+            <span class="stat-label">Complete</span>
+          </div>
+          <div class="stat stat-success">
             <span class="stat-value" id="successCount">0</span>
             <span class="stat-label">Success</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-failed">
             <span class="stat-value" id="failedCount">0</span>
             <span class="stat-label">Failed</span>
           </div>
@@ -116,8 +160,14 @@
 
       <!-- Current Job Display -->
       <div class="current-job hidden" id="currentJobDisplay">
-        <span class="current-label">Currently applying to:</span>
-        <span class="current-url" id="currentJobUrl"></span>
+        <div class="current-job-info">
+          <span class="current-label">Currently applying to:</span>
+          <span class="current-url" id="currentJobUrl"></span>
+        </div>
+        <div class="current-job-platform">
+          <span class="platform-badge" id="currentPlatformBadge">Workday</span>
+          <span class="current-step" id="currentStep">Detecting ATS...</span>
+        </div>
       </div>
     </section>
 
@@ -160,14 +210,30 @@
     <section class="log-section">
       <div class="log-header">
         <h3>📋 Activity Log</h3>
-        <button id="clearLogBtn" class="btn btn-sm btn-secondary">Clear</button>
+        <div class="log-actions">
+          <button id="exportLogBtn" class="btn btn-sm btn-secondary">📤 Export</button>
+          <button id="clearLogBtn" class="btn btn-sm btn-secondary">🗑️ Clear</button>
+        </div>
       </div>
       <div class="log-container" id="logContainer">
         <div class="log-entry info">Ready to start bulk applications...</div>
       </div>
     </section>
+
+    <!-- Resume From Crash Section -->
+    <section class="resume-section hidden" id="resumeSection">
+      <div class="resume-content">
+        <span class="resume-icon">⚠️</span>
+        <span class="resume-text">Previous session detected: <strong id="resumeInfo"></strong></span>
+        <div class="resume-actions">
+          <button id="resumeSessionBtn" class="btn btn-success btn-sm">▶️ Resume</button>
+          <button id="clearSessionBtn" class="btn btn-secondary btn-sm">🗑️ Clear</button>
+        </div>
+      </div>
+    </section>
   </div>
 
+  <script src="workday-flow.js"></script>
   <script src="bulk-apply.js"></script>
 </body>
 </html>

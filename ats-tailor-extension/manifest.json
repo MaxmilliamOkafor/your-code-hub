@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "ATS Tailored CV & Cover Letter",
-  "version": "2.0.0",
-  "description": "Enterprise ATS optimization with Simplify Keyword Matcher scoring, multi-page autofill, and bulk CSV job applications. Supports Greenhouse, Workday, SmartRecruiters, Bullhorn, Teamtailor, Workable, ICIMS, Oracle Cloud.",
+  "version": "2.1.0",
+  "description": "Enterprise ATS optimization with Workday auto-login, bulk CSV job applications, Simplify Keyword Matcher scoring, and multi-ATS autofill. Supports Greenhouse, Workday, SmartRecruiters, Bullhorn, Teamtailor, Workable, ICIMS, Oracle Cloud.",
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "alarms"
   ],
   "host_permissions": [
     "https://*.greenhouse.io/*",
@@ -21,7 +22,10 @@
     "https://*.icims.com/*",
     "https://*.oracle.com/*",
     "https://*.oraclecloud.com/*",
-    "https://*.taleo.net/*"
+    "https://*.taleo.net/*",
+    "https://*.lever.co/*",
+    "https://*.ashbyhq.com/*",
+    "https://*.jobvite.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -45,7 +49,10 @@
         "https://*.icims.com/*",
         "https://*.oracle.com/*",
         "https://*.oraclecloud.com/*",
-        "https://*.taleo.net/*"
+        "https://*.taleo.net/*",
+        "https://*.lever.co/*",
+        "https://*.ashbyhq.com/*",
+        "https://*.jobvite.com/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],
@@ -62,7 +69,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["icons/*.png", "content.css", "bulk-apply.html", "bulk-apply.css", "bulk-apply.js"],
+      "resources": ["icons/*.png", "content.css", "bulk-apply.html", "bulk-apply.css", "bulk-apply.js", "workday-flow.js"],
       "matches": ["<all_urls>"]
     }
   ]
